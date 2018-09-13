@@ -686,6 +686,42 @@ func TestListReviews(t *testing.T) {
 	}
 }
 
+func TestListPullRequestCommits(t *testing.T) {
+	ts := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			t.Errorf("Bad method: %s", r.Method)
+		}
+		if r.URL.Path == "/repos/k8s/kuber/pulls/15/commits" {
+			prCommit := []RepositoryCommit{{SHA: "1"}}
+			b, err := json.Marshal(prCommit)
+			if err != nil {
+				t.Fatalf("Didn't expect error: %v", err)
+			}
+			w.Header().Set("Link", fmt.Sprintf(`<blorp>; rel="first", <https://%s/someotherpath>; rel="next"`, r.Host))
+			fmt.Fprint(w, string(b))
+		} else if r.URL.Path == "/someotherpath" {
+			prCommit := []RepositoryCommit{{SHA: "2"}}
+			b, err := json.Marshal(prCommit)
+			if err != nil {
+				t.Fatalf("Didn't expect error: %v", err)
+			}
+			fmt.Fprint(w, string(b))
+		} else {
+			t.Errorf("Bad request path: %s", r.URL.Path)
+		}
+	}))
+	defer ts.Close()
+	c := getClient(ts.URL)
+	prCommit, err := c.ListPullRequestCommits("k8s", "kuber", 15)
+	if err != nil {
+		t.Errorf("Didn't expect error: %v", err)
+	} else if len(prCommit) != 2 {
+		t.Errorf("Expected two comments, found %d: %v", len(prCommit), prCommit)
+	} else if prCommit[0].SHA != "1" || prCommit[1].SHA != "2" {
+		t.Errorf("Wrong issue IDs: %v", prCommit)
+	}
+}
+
 func TestPrepareReviewersBody(t *testing.T) {
 	var tests = []struct {
 		name         string

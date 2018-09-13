@@ -503,11 +503,28 @@ func (pe PushEvent) Branch() string {
 
 // Commit represents general info about a commit.
 type Commit struct {
-	ID       string   `json:"id"`
-	Message  string   `json:"message"`
-	Added    []string `json:"added"`
-	Removed  []string `json:"removed"`
-	Modified []string `json:"modified"`
+	Message string   `json:"message,omitempty"`
+	Parents []Commit `json:"parents,omitempty"`
+
+	// CommentCount is the number of GitHub comments on the commit. This
+	// is only populated for requests that fetch GitHub data like
+	// Pulls.ListCommits, Repositories.ListCommits, etc.
+	CommentCount int `json:"comment_count,omitempty"`
+}
+
+// RepositoryCommit represents a commit in a repo.
+// Note that it's wrapping a Commit, the Commit contains the "git details"
+// while the RepositoryCommit contains the "github details" - so the author/committer
+// info is the github usernames.
+type RepositoryCommit struct {
+	SHA         string   `json:"sha,omitempty"`
+	Commit      Commit   `json:"commit,omitempty"`
+	Author      User     `json:"author,omitempty"`
+	Committer   User     `json:"committer,omitempty"`
+	Parents     []Commit `json:"parents,omitempty"`
+	HTMLURL     string   `json:"html_url,omitempty"`
+	URL         string   `json:"url,omitempty"`
+	CommentsURL string   `json:"comments_url,omitempty"`
 }
 
 // ReviewEventAction enumerates the triggers for this

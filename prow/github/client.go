@@ -1001,6 +1001,34 @@ func (c *Client) ListReviews(org, repo string, number int) ([]Review, error) {
 	return reviews, nil
 }
 
+// ListPullRequestCommits lists the commits on a pull request.
+//
+// Multiple-pages of comments consumes multiple API tokens.
+//
+// GitHub API docs: https://developer.github.com/v3/pulls/#list-commits-on-a-pull-request
+func (c *Client) ListPullRequestCommits(org, repo string, number int) ([]RepositoryCommit, error) {
+	c.log("ListPullRequestCommits", org, repo, number)
+	if c.fake {
+		return nil, nil
+	}
+	path := fmt.Sprintf("/repos/%s/%s/pulls/%d/commits", org, repo, number)
+	var repoCommits []RepositoryCommit
+	err := c.readPaginatedResults(
+		path,
+		acceptNone,
+		func() interface{} {
+			return &[]RepositoryCommit{}
+		},
+		func(obj interface{}) {
+			repoCommits = append(repoCommits, *(obj.(*[]RepositoryCommit))...)
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	return repoCommits, nil
+}
+
 // CreateStatus creates or updates the status of a commit.
 //
 // See https://developer.github.com/v3/repos/statuses/#create-a-status
