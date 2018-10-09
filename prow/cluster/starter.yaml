@@ -290,7 +290,7 @@ spec:
         backend:
           serviceName: deck
           servicePort: 80
-      - path: /hook/
+      - path: /hook
         backend:
           serviceName: hook
           servicePort: 8888
