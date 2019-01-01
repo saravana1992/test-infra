@@ -701,6 +701,7 @@ type Team struct {
 	Name         string `json:"name"`
 	Description  string `json:"description,omitempty"`
 	Privacy      string `json:"privacy,omitempty"`
+	Permission   string `json:"permission,omitempty"`
 	Parent       *Team  `json:"parent,omitempty"`         // Only present in responses
 	ParentTeamID *int   `json:"parent_team_id,omitempty"` // Only valid in creates/edits
 }

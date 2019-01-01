@@ -374,9 +374,16 @@ func (f *FakeClient) IsCollaborator(org, repo, login string) (bool, error) {
 }
 
 // ListCollaborators lists the collaborators.
-func (f *FakeClient) ListCollaborators(org, repo string) ([]github.User, error) {
-	result := make([]github.User, 0, len(f.Collaborators))
-	for _, login := range f.Collaborators {
+func (f *FakeClient) ListCollaborators(org, repo string, onlyOutsideCollaborators bool) ([]github.User, error) {
+	var collaborators []string
+	if onlyOutsideCollaborators {
+		collaborators = sets.NewString(f.Collaborators...).Difference(sets.NewString(f.OrgMembers[org]...)).List()
+	} else {
+		collaborators = f.Collaborators
+	}
+
+	result := make([]github.User, 0, len(collaborators))
+	for _, login := range collaborators {
 		result = append(result, github.User{Login: login})
 	}
 	return result, nil
