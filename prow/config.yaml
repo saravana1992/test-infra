@@ -456,6 +456,12 @@ tide:
   context_options:
     optional-contexts:
     - "Submit Queue"
+    orgs:
+     kubernetes:
+      repos:
+        dashboard:
+          skip-unknown-contexts: true
+          from-branch-protection: true
 
 push_gateway:
   endpoint: pushgateway
